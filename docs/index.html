@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>claude-dev-loop — a durable dev-loop for Claude Code that refuses to fake "done"</title>
+<meta name="description" content="A durable development-workflow operating system for Claude Code (Cowork Desktop): a persistent vault, verifiable goals and self-checking loops, run logs, approval gates, and an honesty contract that makes &quot;verified&quot; mean proven in the same turn.">
+<meta name="color-scheme" content="dark">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg:        #0d1117;
+    --bg-alt:    #161b22;
+    --line:      #21262d;
+    --text:      #e6edf3;
+    --text-dim:  #8a8f98;
+    --text-soft: #b9c0c8;
+    --accent:    #4aa3ff;
+    --accent-dim:#1f6feb;
+    --green:     #3ecf8e;
+    --red:       #ff6b6b;
+    --amber:     #f1c40f;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 10px;
+    --maxw: 1000px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  .skip-link {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--accent); color: #04101f; padding: 10px 16px;
+    border-radius: 0 0 8px 0; font-weight: 600; z-index: 100;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ---------- top nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(13,17,23,.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px; gap: 16px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; letter-spacing: -.01em; color: var(--text);
+    font-family: var(--mono); font-size: 15px;
+  }
+  .brand:hover { text-decoration: none; }
+  .brand .dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(62,207,142,.16);
+    flex: none;
+  }
+  .nav-links { display: flex; gap: 22px; align-items: center; font-size: 14px; }
+  .nav-links a { color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+  .nav-cta {
+    border: 1px solid var(--line);
+    padding: 7px 14px; border-radius: 8px;
+    color: var(--text) !important; background: var(--bg-alt);
+  }
+  .nav-cta:hover { border-color: var(--accent); text-decoration: none; }
+  @media (max-width: 720px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    padding: 96px 0 72px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(720px 360px at 22% -10%, rgba(74,163,255,.16), transparent 70%),
+      radial-gradient(640px 320px at 92% 0%, rgba(62,207,142,.10), transparent 70%);
+    pointer-events: none;
+  }
+  .hero .wrap { position: relative; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em;
+    color: var(--text-soft);
+    background: var(--bg-alt); border: 1px solid var(--line);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 26px;
+  }
+  .eyebrow .pulse {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex: none;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -.03em;
+    margin: 0 0 22px;
+    font-weight: 800;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(95deg, var(--accent), var(--green));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: var(--accent);
+  }
+  .hero .pitch {
+    font-size: clamp(18px, 2.4vw, 23px);
+    color: var(--text-soft);
+    max-width: 720px; margin: 0 0 36px;
+  }
+  .hero .pitch b { color: var(--text); font-weight: 600; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 15px; font-weight: 600;
+    padding: 12px 22px; border-radius: 9px;
+    border: 1px solid transparent; cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--accent); color: #04101f;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: #6cb6ff; text-decoration: none; }
+  .btn-ghost {
+    background: var(--bg-alt); color: var(--text);
+    border-color: var(--line);
+  }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; }
+  .hero .reqs {
+    margin-top: 22px; font-size: 13px; color: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  /* ---------- generic section ---------- */
+  section { padding: 76px 0; border-bottom: 1px solid var(--line); }
+  .section-tag {
+    font-family: var(--mono); font-size: 12px; text-transform: uppercase;
+    letter-spacing: .12em; color: var(--accent); margin: 0 0 12px;
+  }
+  h2.section-title {
+    font-size: clamp(26px, 4vw, 36px); letter-spacing: -.02em;
+    margin: 0 0 16px; font-weight: 700;
+  }
+  .lede { color: var(--text-soft); font-size: 17px; max-width: 740px; margin: 0; }
+
+  /* ---------- problem ---------- */
+  .problem .wrap { max-width: 860px; }
+  .problem-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px;
+  }
+  @media (max-width: 680px) { .problem-grid { grid-template-columns: 1fr; } }
+  .quote-card {
+    background: var(--bg-alt); border: 1px solid var(--line);
+    border-left: 3px solid var(--red);
+    border-radius: var(--radius); padding: 20px 22px;
+  }
+  .quote-card .said {
+    font-family: var(--mono); font-size: 14px; color: var(--text);
+    margin: 0 0 10px;
+  }
+  .quote-card .truth { font-size: 13.5px; color: var(--text-dim); margin: 0; }
+  .quote-card .truth b { color: var(--red); font-weight: 600; }
+  .quote-card.good { border-left-color: var(--green); }
+  .quote-card.good .truth b { color: var(--green); }
+
+  /* ---------- features ---------- */
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; margin-top: 38px;
+  }
+  @media (max-width: 880px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature {
+    background: var(--bg-alt); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 22px 20px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .feature:hover { border-color: #30404f; transform: translateY(-2px); }
+  .feature .ico {
+    width: 38px; height: 38px; border-radius: 9px;
+    display: grid; place-items: center; margin-bottom: 14px;
+    background: rgba(74,163,255,.12); border: 1px solid rgba(74,163,255,.30);
+  }
+  .feature .ico svg { width: 20px; height: 20px; display: block; }
+  .feature h3 { margin: 0 0 7px; font-size: 16.5px; letter-spacing: -.01em; }
+  .feature p { margin: 0; font-size: 14px; color: var(--text-dim); }
+  .feature p code {
+    font-family: var(--mono); font-size: 12.5px; color: var(--text-soft);
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 1px 5px; border-radius: 5px;
+  }
+
+  /* ---------- install ---------- */
+  .install .wrap { max-width: 820px; }
+  .code-block {
+    margin-top: 28px;
+    background: #0a0e14; border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .code-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid var(--line);
+    background: var(--bg-alt);
+  }
+  .code-head .label {
+    font-family: var(--mono); font-size: 12px; color: var(--text-dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .code-head .label .lamp { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+  .copy-btn {
+    font-family: var(--mono); font-size: 12px; cursor: pointer;
+    background: var(--bg); color: var(--text-soft);
+    border: 1px solid var(--line); border-radius: 6px; padding: 5px 11px;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--text); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+  pre {
+    margin: 0; padding: 18px 16px; overflow-x: auto;
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.7;
+    color: var(--text);
+  }
+  pre .tok-cmd { color: var(--accent); }
+  pre .tok-flag { color: var(--green); }
+  pre .tok-str { color: var(--amber); }
+  pre .tok-dim { color: var(--text-dim); }
+  .install-note { margin-top: 18px; font-size: 14px; color: var(--text-dim); }
+  .install-note code {
+    font-family: var(--mono); font-size: 12.5px; color: var(--text-soft);
+    background: var(--bg-alt); border: 1px solid var(--line);
+    padding: 1px 6px; border-radius: 5px;
+  }
+
+  /* ---------- how it works ---------- */
+  .steps { margin-top: 40px; display: grid; gap: 14px; }
+  .step {
+    display: grid; grid-template-columns: 52px 1fr; gap: 18px;
+    background: var(--bg-alt); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px 22px;
+  }
+  .step .num {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: grid; place-items: center;
+    font-family: var(--mono); font-weight: 700; font-size: 16px;
+    color: var(--accent);
+    background: rgba(74,163,255,.10); border: 1px solid rgba(74,163,255,.30);
+  }
+  .step h3 { margin: 2px 0 6px; font-size: 16.5px; }
+  .step p { margin: 0; font-size: 14px; color: var(--text-dim); }
+  .step p code {
+    font-family: var(--mono); font-size: 12.5px; color: var(--text-soft);
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 1px 5px; border-radius: 5px;
+  }
+
+  /* ---------- honesty callout ---------- */
+  .honesty .wrap { max-width: 840px; }
+  .contract {
+    margin-top: 8px;
+    background:
+      linear-gradient(180deg, rgba(74,163,255,.07), rgba(62,207,142,.04));
+    border: 1px solid #233040;
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 30px 32px;
+  }
+  .contract .pre {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 16px;
+  }
+  .contract blockquote {
+    margin: 0; font-size: clamp(19px, 2.6vw, 24px); line-height: 1.5;
+    letter-spacing: -.01em; color: var(--text);
+  }
+  .contract blockquote b { color: var(--green); }
+  .contract .rules { margin: 24px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .contract .rules li {
+    display: grid; grid-template-columns: 22px 1fr; gap: 12px;
+    font-size: 14.5px; color: var(--text-soft);
+  }
+  .contract .rules li svg { width: 18px; height: 18px; margin-top: 3px; flex: none; }
+  .contract .rules li b { color: var(--text); font-weight: 600; }
+
+  /* ---------- footer ---------- */
+  footer {
+    padding: 48px 0 56px; border-bottom: none;
+  }
+  .footer-inner {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 18px;
+  }
+  .footer-brand {
+    font-family: var(--mono); font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .footer-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
+  .footer-links { display: flex; gap: 22px; font-size: 14px; }
+  .footer-links a { color: var(--text-dim); }
+  .footer-links a:hover { color: var(--text); }
+  .footer-meta {
+    margin-top: 22px; font-size: 12.5px; color: var(--text-dim);
+    font-family: var(--mono);
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>claude-dev-loop</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#problem">The problem</a>
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#how">How it works</a>
+      <a class="nav-cta" href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<a id="top"></a>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" style="border-top:none">
+  <div class="wrap">
+    <span class="eyebrow"><span class="pulse" aria-hidden="true"></span>For Claude Code in the Cowork Desktop app</span>
+    <h1>A durable dev-loop for Claude Code that <span class="accent">refuses to fake&nbsp;&ldquo;done.&rdquo;</span></h1>
+    <p class="pitch">
+      A development-workflow operating system that gives Claude a persistent <b>vault</b>,
+      verifiable <b>goals</b> and self-checking <b>loops</b>, honest <b>run logs</b>,
+      hard <b>approval gates</b>, and an <b>honesty contract</b> that makes
+      &ldquo;verified&rdquo; mean <b>proven in the same turn</b> &mdash; or else say
+      &ldquo;not verified.&rdquo;
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#install">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 12 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Install it
+      </a>
+      <a class="btn btn-ghost" href="#honesty">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v5c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+        Read the contract
+      </a>
+    </div>
+    <p class="reqs">Requirements: Python 3 (standard library only &mdash; no pip installs) and PowerShell. That&rsquo;s it.</p>
+  </div>
+</section>
+
+<!-- ===================== PROBLEM ===================== -->
+<section id="problem" class="problem">
+  <div class="wrap">
+    <p class="section-tag">The problem</p>
+    <h2 class="section-title">Assistants overclaim &mdash; then quietly work around what&rsquo;s missing.</h2>
+    <p class="lede">
+      The failure mode this system exists to kill: an assistant that <em>claims</em> work is done,
+      <em>claims</em> something is verified, or silently routes around a missing dependency &mdash;
+      a model, a binary, a service, credentials &mdash; and calls the result finished.
+      &ldquo;I tested around it&rdquo; is not a third option.
+    </p>
+    <div class="problem-grid">
+      <div class="quote-card">
+        <p class="said">&ldquo;Verified &mdash; all done. &#9989;&rdquo;</p>
+        <p class="truth"><b>No evidence.</b> No command, no output, no observation in the same turn. A claim of proof without the proof.</p>
+      </div>
+      <div class="quote-card">
+        <p class="said">&ldquo;Tests pass, so the feature works.&rdquo;</p>
+        <p class="truth"><b>Conflated.</b> &ldquo;Unit tests pass&rdquo; is not &ldquo;the user-facing feature works end to end.&rdquo;</p>
+      </div>
+      <div class="quote-card">
+        <p class="said">&ldquo;The model wasn&rsquo;t there, so I mocked it &mdash; works.&rdquo;</p>
+        <p class="truth"><b>Worked around.</b> An absent dependency was bypassed and the path was never actually exercised.</p>
+      </div>
+      <div class="quote-card good">
+        <p class="said">&ldquo;Not verified &mdash; here&rsquo;s what&rsquo;s blocking it.&rdquo;</p>
+        <p class="truth"><b>Honest.</b> A hedge with a plan beats a confident guess. Always a better outcome than a false &ldquo;finished.&rdquo;</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section id="features">
+  <div class="wrap">
+    <p class="section-tag">What&rsquo;s in the box</p>
+    <h2 class="section-title">Seven parts, one contract.</h2>
+    <p class="lede">Everything lives in a plain-Markdown vault a human can read and edit, maintained through standard-library Python helpers so the formats stay machine-parseable.</p>
+
+    <div class="features-grid">
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/><path d="M9 3v18"/><path d="M14 8h3M14 12h3"/></svg></div>
+        <h3>Vault memory</h3>
+        <p>A persistent <code>.claude-loop/</code> directory &mdash; project brief, preferences, approval gates, open loops, automation registry, decision log &mdash; loaded at the start of every session.</p>
+      </article>
+
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="#4aa3ff"/></svg></div>
+        <h3>Goals with verification criteria</h3>
+        <p>Each goal card carries a binary done-list. A criterion flips to <code>[x]</code> only after its verification step actually ran and passed.</p>
+      </article>
+
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3>Self-checking loops</h3>
+        <p>A recurring task with a contract: trigger, action, verifier, budget, and stop condition. A loop with no verifier isn&rsquo;t a loop &mdash; it&rsquo;s a wish.</p>
+      </article>
+
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v16a2 2 0 0 0 2 2h12"/><path d="m8 16 3-4 2 2 3-5"/></svg></div>
+        <h3>Run logs</h3>
+        <p>Every loop iteration is appended as a run &mdash; observed, action, the <em>real</em> verifier result including failures, next step. An all-PASS log is a red flag, not a success story.</p>
+      </article>
+
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v5c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3>Approval gates</h3>
+        <p>Free locally; ask first for anything outward or irreversible &mdash; push, deploy, send, delete, install, spend, third-party. Gated actions get queued, never assumed.</p>
+      </article>
+
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 8h18"/><path d="M6 8 3 14a4 4 0 0 0 6 0z"/><path d="M18 8l-3 6a4 4 0 0 0 6 0z"/></svg></div>
+        <h3>The honesty contract</h3>
+        <p>The reason the system exists: no &ldquo;verified / done / &#9989;&rdquo; without evidence in the same turn. Read first, every session &mdash; these rules override convenience.</p>
+      </article>
+
+      <article class="feature">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
+        <h3>The status dashboard</h3>
+        <p>A generated, self-contained dark-themed <code>status.html</code> &mdash; every goal&rsquo;s progress, every loop&rsquo;s run count and last verifier, pending approvals, and open loops. No external dependencies.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== INSTALL ===================== -->
+<section id="install" class="install">
+  <div class="wrap">
+    <p class="section-tag">Install &mdash; Windows PowerShell</p>
+    <h2 class="section-title">One line, from inside the repo.</h2>
+    <p class="lede">
+      Copies the <code style="font-family:var(--mono)">skill/</code> payload
+      (<code style="font-family:var(--mono)">SKILL.md</code> + <code style="font-family:var(--mono)">CLAUDE.md</code>),
+      <code style="font-family:var(--mono)">scripts/</code>, and
+      <code style="font-family:var(--mono)">vault-templates/</code> into
+      <code style="font-family:var(--mono)">%USERPROFILE%\.claude\skills\claude-dev-loop</code>.
+    </p>
+
+    <div class="code-block">
+      <div class="code-head">
+        <span class="label"><span class="lamp" aria-hidden="true"></span>PowerShell</span>
+        <button class="copy-btn" type="button" id="copyBtn" data-copy="powershell -ExecutionPolicy Bypass -File installers\install.ps1" aria-label="Copy install command">Copy</button>
+      </div>
+      <pre><code><span class="tok-cmd">powershell</span> <span class="tok-flag">-ExecutionPolicy</span> Bypass <span class="tok-flag">-File</span> installers\install.ps1</code></pre>
+    </div>
+
+    <p class="install-note">
+      <code>SKILL.md</code> (YAML frontmatter) is the loader Claude Code discovers;
+      <code>CLAUDE.md</code> beside it holds the full operating contract. Restart the
+      Cowork Desktop app afterward so it picks up the new skill. On this machine the
+      Python launcher is <code>py</code>.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section id="how">
+  <div class="wrap">
+    <p class="section-tag">How it works</p>
+    <h2 class="section-title">From install to a finalized, dashboard-clean session.</h2>
+    <p class="lede">All scripts are standard-library Python 3 and take <code style="font-family:var(--mono)">--target &lt;project-root&gt;</code> as their first argument.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num" aria-hidden="true">1</div>
+        <div>
+          <h3>Install the skill</h3>
+          <p>Run <code>installers\install.ps1</code>, then restart Cowork Desktop. The skill activates at the start of any session in a project that has &mdash; or should have &mdash; a <code>.claude-loop/</code> vault.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num" aria-hidden="true">2</div>
+        <div>
+          <h3>Bootstrap a vault</h3>
+          <p><code>bootstrap_vault.py --target .</code> creates <code>.claude-loop/</code> with its Markdown files and <code>goals/</code>, <code>loops/</code>, <code>runs/</code> subdirs. Re-runnable &mdash; it skips files that already exist. Then fill in the project brief, preferences, and approval gates.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num" aria-hidden="true">3</div>
+        <div>
+          <h3>Declare goals &amp; loops</h3>
+          <p><code>create_goal.py</code> writes a goal card with <code>--objective</code>, <code>--criteria</code>, and <code>--verify</code> steps. <code>create_loop.py</code> writes a loop spec with <code>--trigger</code>, <code>--action</code>, <code>--verifier</code>, <code>--budget</code>, and <code>--stop</code> &mdash; and registers it in the automation registry.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num" aria-hidden="true">4</div>
+        <div>
+          <h3>Record runs &amp; queue approvals</h3>
+          <p>After every loop iteration, <code>record_run.py</code> appends what you <code>--observed</code>, the <code>--action</code>, the real <code>--result</code>, and the <code>--next</code> step. Hit something gated? <code>queue_approval.py</code> logs it with <code>--action</code>, <code>--reason</code>, <code>--risk</code>, and <code>--risk-level</code> &mdash; then you keep doing non-gated work until the user answers in chat.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num" aria-hidden="true">5</div>
+        <div>
+          <h3>Finalize &amp; refresh the dashboard</h3>
+          <p>Before closing, <code>finalize_check.py</code> fails on pending approvals, active goals with zero proven criteria, or unresolved open loops. <code>memory_check.py</code> reports health any time. Then <code>loop_status.py --html</code> regenerates <code>status.html</code> so the next session starts from truth.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HONESTY CONTRACT ===================== -->
+<section id="honesty" class="honesty">
+  <div class="wrap">
+    <p class="section-tag">The honesty contract</p>
+    <div class="contract">
+      <p class="pre">CLAUDE.md &middot; &sect;0 &middot; read this first, every session</p>
+      <blockquote>
+        No &ldquo;verified&rdquo; / &ldquo;done&rdquo; / &ldquo;&#9989;&rdquo; without evidence in the same turn.
+        A claim of success must be accompanied by the command that proves it and its actual
+        output, or an on-screen observation you just made. If you don&rsquo;t have the evidence
+        in front of you, the correct words are <b>&ldquo;not verified&rdquo;</b> or
+        <b>&ldquo;I have not run this.&rdquo;</b>
+      </blockquote>
+      <ul class="rules">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>
+          <span>A goal criterion is checked off <b>only after</b> its verification step actually ran and passed.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>
+          <span>Never work around an absent dependency and call the feature tested &mdash; install it and run the path, or say plainly it was <b>not exercised</b>.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>
+          <span>Distinguish <b>code-verified</b> from <b>runtime-verified</b>. Surface lost or reverted work immediately and loudly.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>
+          <span>When unsure, say so. A hedge with a plan beats a confident guess.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <span class="footer-brand"><span class="dot" aria-hidden="true"></span>claude-dev-loop</span>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="#problem">The problem</a>
+        <a href="#install">Install</a>
+        <a href="#how">How it works</a>
+        <a href="#honesty">Honesty contract</a>
+      </nav>
+    </div>
+    <p class="footer-meta">
+      MIT licensed &middot; for Claude Code in the Cowork Desktop app &middot; standard-library Python 3 + PowerShell, zero network requests.
+    </p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('copyBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var done = function () {
+        var original = 'Copy';
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
+      } else {
+        fallback(text, done);
+      }
+    });
+    function fallback(text, cb) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      cb();
+    }
+  })();
+</script>
+</body>
+</html>

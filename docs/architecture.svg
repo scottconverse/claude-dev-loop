@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a8f98"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4aa3ff"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff6b6b"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="960" height="640" fill="#0d1117"/>
+
+  <!-- title -->
+  <text x="24" y="34" fill="#e6edf3" font-size="20" font-weight="700">claude-dev-loop — architecture</text>
+  <text x="24" y="54" fill="#8a8f98" font-size="12">Durable development-workflow OS for Claude Code (Cowork Desktop). Honesty contract + vault + goals/loops/runs + safety gate.</text>
+
+  <!-- ===================== A: INSTALLED SKILL ===================== -->
+  <rect x="24" y="74" width="404" height="218" rx="10" fill="#11161d" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="40" y="98" fill="#4aa3ff" font-size="13" font-weight="700">A · INSTALLED SKILL</text>
+  <text x="40" y="115" fill="#8a8f98" font-size="11" font-family="ui-monospace, Consolas, monospace">~/.claude/skills/claude-dev-loop/</text>
+
+  <!-- SKILL.md loader -->
+  <rect x="40" y="126" width="174" height="48" rx="7" fill="#161b22" stroke="#3ecf8e" stroke-width="1.5"/>
+  <text x="50" y="145" fill="#e6edf3" font-size="13" font-weight="600">SKILL.md</text>
+  <text x="50" y="162" fill="#8a8f98" font-size="11">loader · YAML frontmatter</text>
+
+  <!-- CLAUDE.md contract -->
+  <rect x="230" y="126" width="182" height="48" rx="7" fill="#161b22" stroke="#f1c40f" stroke-width="1.5"/>
+  <text x="240" y="145" fill="#e6edf3" font-size="13" font-weight="600">CLAUDE.md</text>
+  <text x="240" y="162" fill="#8a8f98" font-size="11">the contract (authoritative)</text>
+
+  <!-- loader -> contract arrow -->
+  <line x1="214" y1="150" x2="228" y2="150" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- scripts/ -->
+  <rect x="40" y="186" width="174" height="92" rx="7" fill="#161b22" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="50" y="205" fill="#e6edf3" font-size="13" font-weight="600">scripts/  (stdlib-only)</text>
+  <text x="50" y="222" fill="#8a8f98" font-size="10.5" font-family="ui-monospace, Consolas, monospace">bootstrap_vault · create_goal</text>
+  <text x="50" y="237" fill="#8a8f98" font-size="10.5" font-family="ui-monospace, Consolas, monospace">create_loop · record_run</text>
+  <text x="50" y="252" fill="#8a8f98" font-size="10.5" font-family="ui-monospace, Consolas, monospace">queue_approval · memory_check</text>
+  <text x="50" y="267" fill="#8a8f98" font-size="10.5" font-family="ui-monospace, Consolas, monospace">finalize_check · loop_status · _common</text>
+
+  <!-- vault-templates/ -->
+  <rect x="230" y="186" width="182" height="92" rx="7" fill="#161b22" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="240" y="205" fill="#e6edf3" font-size="13" font-weight="600">vault-templates/</text>
+  <text x="240" y="222" fill="#8a8f98" font-size="10.5">6 starter .md files copied</text>
+  <text x="240" y="237" fill="#8a8f98" font-size="10.5">into each new vault by</text>
+  <text x="240" y="252" fill="#8a8f98" font-size="10.5" font-family="ui-monospace, Consolas, monospace">bootstrap_vault.py</text>
+
+  <!-- ===================== B: PER-PROJECT VAULT ===================== -->
+  <rect x="532" y="74" width="404" height="386" rx="10" fill="#11161d" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="548" y="98" fill="#4aa3ff" font-size="13" font-weight="700">B · PER-PROJECT VAULT</text>
+  <text x="548" y="115" fill="#8a8f98" font-size="11" font-family="ui-monospace, Consolas, monospace">&lt;project-root&gt;/.claude-loop/</text>
+
+  <!-- top-level files (read on session start) -->
+  <rect x="548" y="126" width="372" height="120" rx="7" fill="#161b22" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="558" y="144" fill="#e6edf3" font-size="12" font-weight="600">Top-level files (plain Markdown)</text>
+  <text x="558" y="164" fill="#c9d1d9" font-size="11" font-family="ui-monospace, Consolas, monospace">project-brief.md   preferences.md</text>
+  <text x="558" y="182" fill="#c9d1d9" font-size="11" font-family="ui-monospace, Consolas, monospace">approval-gates.md   approval-queue.md</text>
+  <text x="558" y="200" fill="#c9d1d9" font-size="11" font-family="ui-monospace, Consolas, monospace">open-loops.md   automation-registry.md</text>
+  <text x="558" y="218" fill="#c9d1d9" font-size="11" font-family="ui-monospace, Consolas, monospace">decision-log.md</text>
+  <text x="558" y="238" fill="#8a8f98" font-size="10.5">brief/prefs/gates/open-loops/queue loaded every session start</text>
+
+  <!-- subdirs -->
+  <rect x="548" y="258" width="118" height="78" rx="7" fill="#161b22" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="558" y="277" fill="#e6edf3" font-size="12" font-weight="600">goals/</text>
+  <text x="558" y="295" fill="#8a8f98" font-size="10.5">&lt;slug&gt;.md</text>
+  <text x="558" y="310" fill="#8a8f98" font-size="10.5">one card per</text>
+  <text x="558" y="324" fill="#8a8f98" font-size="10.5">objective</text>
+
+  <rect x="675" y="258" width="118" height="78" rx="7" fill="#161b22" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="685" y="277" fill="#e6edf3" font-size="12" font-weight="600">loops/</text>
+  <text x="685" y="295" fill="#8a8f98" font-size="10.5">&lt;slug&gt;.md</text>
+  <text x="685" y="310" fill="#8a8f98" font-size="10.5">trigger/action/</text>
+  <text x="685" y="324" fill="#8a8f98" font-size="10.5">verifier/stop</text>
+
+  <rect x="802" y="258" width="118" height="78" rx="7" fill="#161b22" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="812" y="277" fill="#e6edf3" font-size="12" font-weight="600">runs/</text>
+  <text x="812" y="295" fill="#8a8f98" font-size="10.5">&lt;slug&gt;-runs.md</text>
+  <text x="812" y="310" fill="#8a8f98" font-size="10.5">append-only</text>
+  <text x="812" y="324" fill="#8a8f98" font-size="10.5">run log</text>
+
+  <!-- generated status.html -->
+  <rect x="548" y="350" width="372" height="58" rx="7" fill="#161b22" stroke="#3ecf8e" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="558" y="370" fill="#3ecf8e" font-size="12" font-weight="600">status.html  (generated · gitignored)</text>
+  <text x="558" y="390" fill="#8a8f98" font-size="10.5">self-contained dark dashboard from loop_status.py --html — never hand-edit</text>
+
+  <text x="548" y="430" fill="#8a8f98" font-size="10.5">Scripts maintain these files so formats stay machine-parseable;</text>
+  <text x="548" y="446" fill="#8a8f98" font-size="10.5">a human can still read/edit the Markdown directly.</text>
+
+  <!-- A -> B : bootstrap creates vault -->
+  <path d="M428 232 C 480 232, 490 186, 546 186" fill="none" stroke="#4aa3ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="436" y="208" fill="#4aa3ff" font-size="10.5" font-weight="600">bootstrap_vault.py</text>
+  <text x="436" y="221" fill="#4aa3ff" font-size="10.5">creates / seeds</text>
+
+  <!-- ===================== C: SESSION CONTROL FLOW ===================== -->
+  <rect x="24" y="312" width="404" height="148" rx="10" fill="#11161d" stroke="#2b3340" stroke-width="1.5"/>
+  <text x="40" y="336" fill="#4aa3ff" font-size="13" font-weight="700">C · SESSION CONTROL FLOW</text>
+
+  <!-- flow nodes row 1 -->
+  <rect x="40" y="348" width="86" height="40" rx="6" fill="#161b22" stroke="#2b3340"/>
+  <text x="83" y="366" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="middle">session</text>
+  <text x="83" y="380" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="middle">start</text>
+
+  <rect x="146" y="348" width="86" height="40" rx="6" fill="#161b22" stroke="#2b3340"/>
+  <text x="189" y="366" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="middle">load</text>
+  <text x="189" y="380" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="middle">vault</text>
+
+  <rect x="252" y="348" width="86" height="40" rx="6" fill="#161b22" stroke="#2b3340"/>
+  <text x="295" y="364" fill="#e6edf3" font-size="10.5" font-weight="600" text-anchor="middle">memory_</text>
+  <text x="295" y="378" fill="#e6edf3" font-size="10.5" font-weight="600" text-anchor="middle">check</text>
+
+  <rect x="358" y="348" width="56" height="40" rx="6" fill="#161b22" stroke="#2b3340"/>
+  <text x="386" y="366" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="middle">do</text>
+  <text x="386" y="380" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="middle">work</text>
+
+  <line x1="126" y1="368" x2="144" y2="368" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="232" y1="368" x2="250" y2="368" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="338" y1="368" x2="356" y2="368" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- flow nodes row 2 -->
+  <rect x="40" y="402" width="180" height="42" rx="6" fill="#161b22" stroke="#2b3340"/>
+  <text x="130" y="419" fill="#e6edf3" font-size="10.5" font-weight="600" text-anchor="middle">create goals / loops · record runs</text>
+  <text x="130" y="433" fill="#8a8f98" font-size="10" text-anchor="middle">queue approvals (gated work)</text>
+
+  <rect x="234" y="402" width="92" height="42" rx="6" fill="#161b22" stroke="#f1c40f"/>
+  <text x="280" y="419" fill="#f1c40f" font-size="10.5" font-weight="600" text-anchor="middle">finalize_check</text>
+  <text x="280" y="433" fill="#8a8f98" font-size="10" text-anchor="middle">close gate</text>
+
+  <rect x="340" y="402" width="74" height="42" rx="6" fill="#161b22" stroke="#3ecf8e"/>
+  <text x="377" y="419" fill="#3ecf8e" font-size="10.5" font-weight="600" text-anchor="middle">loop_status</text>
+  <text x="377" y="433" fill="#8a8f98" font-size="10" text-anchor="middle">dashboard</text>
+
+  <!-- work -> row2 wrap -->
+  <path d="M386 388 C 386 396, 200 392, 130 400" fill="none" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="220" y1="423" x2="232" y2="423" stroke="#8a8f98" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="326" y1="423" x2="338" y2="423" stroke="#3ecf8e" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- finalize fail loop back -->
+  <path d="M280 444 C 280 470, 130 470, 130 446" fill="none" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="150" y="467" fill="#ff6b6b" font-size="9.5">FAIL → resolve / defer, then retry</text>
+
+  <!-- C reads/writes B -->
+  <path d="M428 405 C 470 405, 500 300, 546 290" fill="none" stroke="#8a8f98" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+  <text x="440" y="350" fill="#8a8f98" font-size="9.5">scripts read /</text>
+  <text x="440" y="362" fill="#8a8f98" font-size="9.5">write the vault</text>
+
+  <!-- session start reads vault (B -> load vault) -->
+  <path d="M548 200 C 470 210, 230 300, 189 346" fill="none" stroke="#4aa3ff" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrowBlue)"/>
+
+  <!-- ===================== D: SAFETY GATE ===================== -->
+  <rect x="24" y="480" width="912" height="138" rx="10" fill="#11161d" stroke="#ff6b6b" stroke-width="1.5"/>
+  <text x="40" y="504" fill="#ff6b6b" font-size="13" font-weight="700">D · SAFETY GATE — free locally vs. ask-first (approval comes ONLY from the user in chat)</text>
+
+  <!-- FREE column -->
+  <rect x="40" y="514" width="420" height="92" rx="8" fill="#10231a" stroke="#3ecf8e" stroke-width="1.5"/>
+  <text x="54" y="533" fill="#3ecf8e" font-size="12" font-weight="700">FREE — no approval needed</text>
+  <text x="54" y="552" fill="#c9d1d9" font-size="11">• read / search / inspect the repo</text>
+  <text x="54" y="569" fill="#c9d1d9" font-size="11">• build · test · lint · type-check · format</text>
+  <text x="54" y="586" fill="#c9d1d9" font-size="11">• edit code on a working branch</text>
+  <text x="54" y="600" fill="#c9d1d9" font-size="11">• read/write vault · run scripts · read-only git</text>
+
+  <!-- gate divider -->
+  <line x1="480" y1="514" x2="480" y2="606" stroke="#ff6b6b" stroke-width="2.5"/>
+  <polygon points="480,514 472,528 488,528" fill="#ff6b6b"/>
+  <text x="480" y="630" fill="#ff6b6b" font-size="10.5" font-weight="700" text-anchor="middle">GATE</text>
+
+  <!-- ASK-FIRST column -->
+  <rect x="500" y="514" width="420" height="92" rx="8" fill="#251316" stroke="#ff6b6b" stroke-width="1.5"/>
+  <text x="514" y="533" fill="#ff6b6b" font-size="12" font-weight="700">ASK FIRST — queue an approval (§7)</text>
+  <text x="514" y="552" fill="#c9d1d9" font-size="11">• push · merge · deploy · publish · release · tag</text>
+  <text x="514" y="569" fill="#c9d1d9" font-size="11">• send outward (email / message / PR / post / issue)</text>
+  <text x="514" y="586" fill="#c9d1d9" font-size="11">• delete data · install software · spend money</text>
+  <text x="514" y="600" fill="#c9d1d9" font-size="11">• change prod config · any authenticated 3rd-party action</text>
+
+  <!-- queue arrow from ask-first up to approval-queue concept -->
+  <path d="M710 514 C 710 480, 720 466, 730 462" fill="none" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="724" y="476" fill="#ff6b6b" font-size="9.5">→ approval-queue.md (pending)</text>
+</svg>
