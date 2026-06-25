@@ -24,9 +24,10 @@ From inside the repo:
 powershell -ExecutionPolicy Bypass -File installers\install.ps1
 ```
 
-This copies `skill/CLAUDE.md`, `scripts/`, and `vault-templates/` into
-`%USERPROFILE%\.claude\skills\claude-dev-loop`. Restart the Cowork Desktop app afterward so it
-picks up the new skill.
+This copies the `skill/` payload (`SKILL.md` + `CLAUDE.md`), `scripts/`, and `vault-templates/`
+into `%USERPROFILE%\.claude\skills\claude-dev-loop`. `SKILL.md` (YAML frontmatter) is the loader
+Claude Code discovers; `CLAUDE.md` beside it holds the full operating contract. Restart the Cowork
+Desktop app afterward so it picks up the new skill.
 
 Requirements: **Python 3** (standard library only — no pip installs) and PowerShell. That's it.
 
