@@ -1,3 +1,5 @@
+> **Archived October 17, 2026.** The problem this loop addressed, an agent stalling, drifting or declaring done without evidence, is now handled by harness hooks rather than a vault-and-loop protocol: `sprint-gate`, `measure-gate`, `ran-before-done` and `citation-gate` in [claude-hook-kit](https://github.com/scottconverse/claude-hook-kit), switched on per project by `New-AgentProject.ps1` in [cowork-autonomy-kit](https://github.com/scottconverse/cowork-autonomy-kit). The prose discipline lives in [dev-rigor-stack-lite](https://github.com/scottconverse/dev-rigor-stack-lite). Nothing from this repo was ported; a file-by-file check on Oct 17 found no copy of any of its files in a surviving repo. Everything remains readable here. This repository is read-only; history and issues are preserved.
+
 # claude-dev-loop
 
 A durable development-workflow operating system for **Claude Code in the Cowork Desktop app
